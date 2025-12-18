@@ -7,11 +7,10 @@
   </ul>
 </template>
 
-<script>
-export default {
-  name: "RwvListErorrs",
-  props: {
-    errors: { type: Object, required: true }
-  }
-};
+<script setup lang="ts">
+defineProps({
+  errors: { type: Object, required: true }
+});
 </script>
+
+<style scoped></style>

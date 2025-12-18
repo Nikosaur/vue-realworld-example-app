@@ -28,74 +28,82 @@
   </span>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import {
-  FAVORITE_ADD,
-  FAVORITE_REMOVE,
-  ARTICLE_DELETE,
-  FETCH_PROFILE_FOLLOW,
-  FETCH_PROFILE_UNFOLLOW
-} from "@/store/actions.type";
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useProfileStore } from '@/stores/profile';
+import { useArticleStore } from '@/stores/article';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  name: "RwvArticleActions",
-  props: {
-    article: { type: Object, required: true },
-    canModify: { type: Boolean, required: true }
-  },
-  computed: {
-    ...mapGetters(["profile", "isAuthenticated"]),
-    editArticleLink() {
-      return { name: "article-edit", params: { slug: this.article.slug } };
-    },
-    toggleFavoriteButtonClasses() {
-      return {
-        "btn-primary": this.article.favorited,
-        "btn-outline-primary": !this.article.favorited
-      };
-    },
-    followUserLabel() {
-      return `${this.profile.following ? "Unfollow" : "Follow"} ${
-        this.article.author.username
-      }`;
-    },
-    favoriteArticleLabel() {
-      return this.article.favorited ? "Unfavorite Article" : "Favorite Article";
-    },
-    favoriteCounter() {
-      return `(${this.article.favoritesCount})`;
-    }
-  },
-  methods: {
-    toggleFavorite() {
-      if (!this.isAuthenticated) {
-        this.$router.push({ name: "login" });
-        return;
-      }
-      const action = this.article.favorited ? FAVORITE_REMOVE : FAVORITE_ADD;
-      this.$store.dispatch(action, this.article.slug);
-    },
-    toggleFollow() {
-      if (!this.isAuthenticated) {
-        this.$router.push({ name: "login" });
-        return;
-      }
-      const action = this.article.following
-        ? FETCH_PROFILE_UNFOLLOW
-        : FETCH_PROFILE_FOLLOW;
-      this.$store.dispatch(action, {
-        username: this.profile.username
-      });
-    },
-    async deleteArticle() {
-      try {
-        await this.$store.dispatch(ARTICLE_DELETE, this.article.slug);
-        this.$router.push("/");
-      } catch (err) {
-        console.error(err);
-      }
-    }
+const props = defineProps({
+  article: { type: Object, required: true },
+  canModify: { type: Boolean, required: true }
+});
+
+const profileStore = useProfileStore();
+const articleStore = useArticleStore();
+const authStore = useAuthStore();
+const router = useRouter();
+
+const profile = computed(() => profileStore.profile);
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+
+const editArticleLink = computed(() => {
+  return { name: "article-edit", params: { slug: props.article.slug } };
+});
+
+const toggleFavoriteButtonClasses = computed(() => {
+  return {
+    "btn-primary": props.article.favorited,
+    "btn-outline-primary": !props.article.favorited
+  };
+});
+
+const followUserLabel = computed(() => {
+  return `${profile.value.following ? "Unfollow" : "Follow"} ${
+    props.article.author.username
+  }`;
+});
+
+const favoriteArticleLabel = computed(() => {
+  return props.article.favorited ? "Unfavorite Article" : "Favorite Article";
+});
+
+const favoriteCounter = computed(() => {
+  return `(${props.article.favoritesCount})`;
+});
+
+const toggleFavorite = async () => {
+  if (!isAuthenticated.value) {
+    router.push({ name: "login" });
+    return;
+  }
+  const action = props.article.favorited ? articleStore.favoriteRemove : articleStore.favoriteAdd;
+  await action(props.article.slug);
+};
+
+const toggleFollow = async () => {
+  if (!isAuthenticated.value) {
+    router.push({ name: "login" });
+    return;
+  }
+  const action = profile.value.following
+    ? profileStore.fetchProfileUnfollow
+    : profileStore.fetchProfileFollow;
+  
+  await action({
+    username: props.article.author.username
+  });
+};
+
+const deleteArticle = async () => {
+  try {
+    await articleStore.articleDelete(props.article.slug);
+    router.push("/");
+  } catch (err) {
+    console.error(err);
   }
 };
 </script>
+
+<style scoped></style>

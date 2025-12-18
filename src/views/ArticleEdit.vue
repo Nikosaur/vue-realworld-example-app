@@ -65,86 +65,81 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import store from "@/store";
-import RwvListErrors from "@/components/ListErrors";
-import {
-  ARTICLE_PUBLISH,
-  ARTICLE_EDIT,
-  FETCH_ARTICLE,
-  ARTICLE_EDIT_ADD_TAG,
-  ARTICLE_EDIT_REMOVE_TAG,
-  ARTICLE_RESET_STATE
-} from "@/store/actions.type";
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
+import RwvListErrors from "@/components/ListErrors.vue";
+import { useArticleStore } from '@/stores/article';
 
-export default {
-  name: "RwvArticleEdit",
-  components: { RwvListErrors },
-  props: {
-    previousArticle: {
-      type: Object,
-      required: false
-    }
-  },
-  async beforeRouteUpdate(to, from, next) {
-    // Reset state if user goes from /editor/:id to /editor
-    // The component is not recreated so we use to hook to reset the state.
-    await store.dispatch(ARTICLE_RESET_STATE);
-    return next();
-  },
-  async beforeRouteEnter(to, from, next) {
-    // SO: https://github.com/vuejs/vue-router/issues/1034
-    // If we arrive directly to this url, we need to fetch the article
-    await store.dispatch(ARTICLE_RESET_STATE);
-    if (to.params.slug !== undefined) {
-      await store.dispatch(
-        FETCH_ARTICLE,
-        to.params.slug,
-        to.params.previousArticle
-      );
-    }
-    return next();
-  },
-  async beforeRouteLeave(to, from, next) {
-    await store.dispatch(ARTICLE_RESET_STATE);
-    next();
-  },
-  data() {
-    return {
-      tagInput: null,
-      inProgress: false,
-      errors: {}
-    };
-  },
-  computed: {
-    ...mapGetters(["article"])
-  },
-  methods: {
-    onPublish(slug) {
-      let action = slug ? ARTICLE_EDIT : ARTICLE_PUBLISH;
-      this.inProgress = true;
-      this.$store
-        .dispatch(action)
-        .then(({ data }) => {
-          this.inProgress = false;
-          this.$router.push({
-            name: "article",
-            params: { slug: data.article.slug }
-          });
-        })
-        .catch(({ response }) => {
-          this.inProgress = false;
-          this.errors = response.data.errors;
-        });
-    },
-    removeTag(tag) {
-      this.$store.dispatch(ARTICLE_EDIT_REMOVE_TAG, tag);
-    },
-    addTag(tag) {
-      this.$store.dispatch(ARTICLE_EDIT_ADD_TAG, tag);
-      this.tagInput = null;
-    }
+const props = defineProps({
+  previousArticle: {
+    type: Object,
+    required: false
+  }
+});
+
+const articleStore = useArticleStore();
+const route = useRoute();
+const router = useRouter();
+
+const tagInput = ref<string | null>(null);
+const inProgress = ref(false);
+const errors = ref({});
+
+const article = computed(() => articleStore.article);
+
+const fetchArticle = async (slug: string, previousArticle: any) => {
+  articleStore.resetState();
+  if (slug !== undefined) {
+    await articleStore.fetchArticle(slug, previousArticle);
   }
 };
+
+onMounted(async () => {
+    // Check if we are editing an existing article
+    if (route.params.slug) {
+        await fetchArticle(route.params.slug as string, props.previousArticle);
+    } else {
+        articleStore.resetState();
+    }
+});
+
+onBeforeRouteUpdate(async (to, from, next) => {
+  articleStore.resetState();
+  next();
+});
+
+onBeforeRouteLeave(async (to, from, next) => {
+  articleStore.resetState();
+  next();
+});
+
+const onPublish = (slug: string) => {
+  let action = slug ? articleStore.articleEdit : articleStore.articlePublish;
+  inProgress.value = true;
+  action()
+    .then(({ data }) => {
+      inProgress.value = false;
+      router.push({
+        name: "article",
+        params: { slug: data.article.slug }
+      });
+    })
+    .catch(({ response }) => {
+      inProgress.value = false;
+      errors.value = response.data.errors;
+    });
+};
+
+const removeTag = (tag: string) => {
+  articleStore.articleRemoveTag(tag);
+};
+
+const addTag = (tag: string | null) => {
+  if (!tag) return;
+  articleStore.articleAddTag(tag);
+  tagInput.value = null;
+};
 </script>
+
+<style scoped></style>

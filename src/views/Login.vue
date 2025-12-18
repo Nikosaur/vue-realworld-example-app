@@ -10,7 +10,7 @@
             </router-link>
           </p>
           <ul v-if="errors" class="error-messages">
-            <li v-for="(v, k) in errors" :key="k">{{ k }} {{ v | error }}</li>
+            <li v-for="(v, k) in errors" :key="k">{{ k }} {{ errorFilter(v) }}</li>
           </ul>
           <form @submit.prevent="onSubmit(email, password)">
             <fieldset class="form-group">
@@ -39,29 +39,26 @@
   </div>
 </template>
 
-<script>
-import { mapState } from "vuex";
-import { LOGIN } from "@/store/actions.type";
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+// @ts-ignore
+import { default as errorFilter } from "@/common/error.filter";
 
-export default {
-  name: "RwvLogin",
-  data() {
-    return {
-      email: null,
-      password: null
-    };
-  },
-  methods: {
-    onSubmit(email, password) {
-      this.$store
-        .dispatch(LOGIN, { email, password })
-        .then(() => this.$router.push({ name: "home" }));
-    }
-  },
-  computed: {
-    ...mapState({
-      errors: state => state.auth.errors
-    })
-  }
+const authStore = useAuthStore();
+const router = useRouter();
+
+const email = ref("");
+const password = ref("");
+
+const errors = computed(() => authStore.errors);
+
+const onSubmit = (emailVal: string, passwordVal: string) => {
+  authStore
+    .login({ email: emailVal, password: passwordVal })
+    .then(() => router.push({ name: "home" }));
 };
 </script>
+
+<style scoped></style>

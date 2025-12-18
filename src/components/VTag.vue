@@ -2,21 +2,24 @@
   <router-link :to="homeRoute" :class="className" v-text="name"></router-link>
 </template>
 
-<script>
-export default {
-  name: "RwvTag",
-  props: {
-    name: {
-      type: String,
-      required: true
-    },
-    className: {
-      type: String,
-      default: "tag-pill tag-default"
-    }
+<script setup lang="ts">
+import { computed } from 'vue';
+
+const props = defineProps({
+  name: {
+    type: String,
+    required: true
   },
-  computed: {
-    homeRoute: () => ({ name: "home-tag", params: { tag: name } })
+  className: {
+    type: String,
+    default: "tag-pill tag-default"
   }
-};
+});
+
+const homeRoute = computed(() => ({ 
+  name: "home-tag", 
+  params: { tag: props.name } 
+}));
 </script>
+
+<style scoped></style>

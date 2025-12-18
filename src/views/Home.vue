@@ -57,24 +57,24 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import RwvTag from "@/components/VTag";
-import { FETCH_TAGS } from "@/store/actions.type";
+<script setup lang="ts">
+import { computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import RwvTag from "@/components/VTag.vue";
+import { useHomeStore } from '@/stores/home';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  name: "home",
-  components: {
-    RwvTag
-  },
-  mounted() {
-    this.$store.dispatch(FETCH_TAGS);
-  },
-  computed: {
-    ...mapGetters(["isAuthenticated", "tags"]),
-    tag() {
-      return this.$route.params.tag;
-    }
-  }
-};
+const homeStore = useHomeStore();
+const authStore = useAuthStore();
+const route = useRoute();
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const tags = computed(() => homeStore.tags);
+const tag = computed(() => route.params.tag);
+
+onMounted(() => {
+  homeStore.fetchTags();
+});
 </script>
+
+<style scoped></style>

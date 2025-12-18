@@ -84,13 +84,13 @@
   </nav>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  name: "RwvHeader",
-  computed: {
-    ...mapGetters(["currentUser", "isAuthenticated"])
-  }
-};
+const authStore = useAuthStore();
+const currentUser = computed(() => authStore.currentUser);
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 </script>
+
+<style scoped></style>

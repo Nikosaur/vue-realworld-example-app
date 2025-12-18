@@ -1,13 +1,13 @@
 [![RealWorld Frontend](https://img.shields.io/badge/realworld-frontend-%23783578.svg)](http://realworld.io)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-----
+---
+
 ##New Maintainers wanted##
 Anyone up for the challenge of maintaining this repo?
 Reach out on twitter @vilsbole
-----
 
-
+---
 
 # ![RealWorld Example App](./static/rwv-logo.png)
 
@@ -36,31 +36,31 @@ Before contributing please read the following:
 > npm install -g editorconfig
 ```
 
-The stack is built using [vue-cli webpack](https://github.com/vuejs-templates/webpack) so to get started all you have to do is:
+The stack is built using [Vite](https://vitejs.dev/) so to get started all you have to do is:
 
-``` bash
+```bash
 # install dependencies
 > yarn install
-# serve with hot reload at localhost:8080
-> yarn serve
+# serve with hot reload at localhost:5173
+> yarn dev
 ```
 
 Other commands available are:
 
-``` bash
-# build for production with minification
-yarn run build
+```bash
+# build for production
+yarn build
 
-# run unit tests
-yarn test
+# preview production build
+yarn preview
 ```
 
 ## To know
 
 Current arbitrary choices are:
 
-- Vuex modules for store
-- Vue-axios for ajax requests
+- [Pinia](https://pinia.vuejs.org/) for state management
+- [Axios](https://github.com/axios/axios) for ajax requests
 - 'rwv' as prefix for components
 
 These can be changed when the contributors reach a consensus.
@@ -70,22 +70,8 @@ These can be changed when the contributors reach a consensus.
 <p><details>
   <summary><b>Where can I find the service worker file?</b></summary>
 
-  The service worker file is generated automatically. The implementation can be found under [`src/registerServiceWorker.js`](https://github.com/gothinkster/vue-realworld-example-app/blob/eeaeb34fa440d00cd400545301ea203bd2a59284/src/registerServiceWorker.js). You can find the dependencies implementation in this repo: [yyx990803/register-service-worker](https://github.com/yyx990803/register-service-worker#readme).
+The service worker file is generated automatically. The implementation can be found under [`src/registerServiceWorker.js`](https://github.com/gothinkster/vue-realworld-example-app/blob/eeaeb34fa440d00cd400545301ea203bd2a59284/src/registerServiceWorker.js). You can find the dependencies implementation in this repo: [yyx990803/register-service-worker](https://github.com/yyx990803/register-service-worker#readme).
 
-  Also, Google provided a good documentation on how to register a service worker: https://developers.google.com/web/fundamentals/primers/service-workers/registration
+Also, Google provided a good documentation on how to register a service worker: https://developers.google.com/web/fundamentals/primers/service-workers/registration
+
 </details></p>
-
-<p><details>
-  <summary><b>Vue.js Function API / Migration to Vue.js 3</b></summary>
-
-  Related resources:
-
-  - [Vue.js Function API RFC](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md)
-  - [`vue-function-api` plugin](https://github.com/vuejs/vue-function-api)
-
-  Vue.js 3 will likely introduce breaking changes on how Vue.js applications will look like. For example, the Vue.js Function API might be introduced. This would cause a lot of our components to change in the overall structure. The changes would be minimal though. With the `vue-function-api` plugin, these changes could be applied already. The problem is that multiple integrations are not working with the plugin. There are intentions to make this work, but for the time being, we should rather focus on different areas. If you still want to be experimental with it, we are happy to get a Pull Request with some experimental feature implementations.
-</details></p>
-
-## Connect
-
-Join us on [Discord](https://discord.gg/NE2jNmg)

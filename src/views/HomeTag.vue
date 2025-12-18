@@ -2,18 +2,13 @@
   <div class="home-tag"><RwvArticleList :tag="tag"></RwvArticleList></div>
 </template>
 
-<script>
-import RwvArticleList from "@/components/ArticleList";
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import RwvArticleList from "@/components/ArticleList.vue";
 
-export default {
-  name: "RwvHomeTag",
-  components: {
-    RwvArticleList
-  },
-  computed: {
-    tag() {
-      return this.$route.params.tag;
-    }
-  }
-};
+const route = useRoute();
+const tag = computed(() => route.params.tag as string);
 </script>
+
+<style scoped></style>

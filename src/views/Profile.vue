@@ -72,41 +72,43 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import {
-  FETCH_PROFILE,
-  FETCH_PROFILE_FOLLOW,
-  FETCH_PROFILE_UNFOLLOW
-} from "@/store/actions.type";
+<script setup lang="ts">
+import { computed, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useProfileStore } from '@/stores/profile';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  name: "RwvProfile",
-  mounted() {
-    this.$store.dispatch(FETCH_PROFILE, this.$route.params);
-  },
-  computed: {
-    ...mapGetters(["currentUser", "profile", "isAuthenticated"])
-  },
-  methods: {
-    isCurrentUser() {
-      if (this.currentUser.username && this.profile.username) {
-        return this.currentUser.username === this.profile.username;
-      }
-      return false;
-    },
-    follow() {
-      if (!this.isAuthenticated) return;
-      this.$store.dispatch(FETCH_PROFILE_FOLLOW, this.$route.params);
-    },
-    unfollow() {
-      this.$store.dispatch(FETCH_PROFILE_UNFOLLOW, this.$route.params);
-    }
-  },
-  watch: {
-    $route(to) {
-      this.$store.dispatch(FETCH_PROFILE, to.params);
-    }
+const profileStore = useProfileStore();
+const authStore = useAuthStore();
+const route = useRoute();
+
+const currentUser = computed(() => authStore.currentUser);
+const profile = computed(() => profileStore.profile);
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+
+const isCurrentUser = () => {
+  if (currentUser.value.username && profile.value.username) {
+    return currentUser.value.username === profile.value.username;
   }
+  return false;
 };
+
+const follow = () => {
+  if (!isAuthenticated.value) return;
+  profileStore.fetchProfileFollow(route.params);
+};
+
+const unfollow = () => {
+  profileStore.fetchProfileUnfollow(route.params);
+};
+
+onMounted(() => {
+  profileStore.fetchProfile(route.params);
+});
+
+watch(() => route.params, (params) => {
+  profileStore.fetchProfile(params);
+});
 </script>
+
+<style scoped></style>

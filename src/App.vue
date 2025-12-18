@@ -6,17 +6,9 @@
   </div>
 </template>
 
-<script>
-import RwvHeader from "@/components/TheHeader";
-import RwvFooter from "@/components/TheFooter";
-
-export default {
-  name: "App",
-  components: {
-    RwvHeader,
-    RwvFooter
-  }
-};
+<script setup lang="ts">
+import RwvHeader from "@/components/TheHeader.vue";
+import RwvFooter from "@/components/TheFooter.vue";
 </script>
 
-<style></style>
+<style scoped></style>

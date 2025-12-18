@@ -51,45 +51,43 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import marked from "marked";
-import store from "@/store";
-import RwvArticleMeta from "@/components/ArticleMeta";
-import RwvComment from "@/components/Comment";
-import RwvCommentEditor from "@/components/CommentEditor";
-import RwvTag from "@/components/VTag";
-import { FETCH_ARTICLE, FETCH_COMMENTS } from "@/store/actions.type";
+<script setup lang="ts">
+import { computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { marked } from "marked";
+import RwvArticleMeta from "@/components/ArticleMeta.vue";
+import RwvComment from "@/components/Comment.vue";
+import RwvCommentEditor from "@/components/CommentEditor.vue";
+import RwvTag from "@/components/VTag.vue";
+import { useArticleStore } from '@/stores/article';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  name: "rwv-article",
-  props: {
-    slug: {
-      type: String,
-      required: true
-    }
-  },
-  components: {
-    RwvArticleMeta,
-    RwvComment,
-    RwvCommentEditor,
-    RwvTag
-  },
-  beforeRouteEnter(to, from, next) {
-    Promise.all([
-      store.dispatch(FETCH_ARTICLE, to.params.slug),
-      store.dispatch(FETCH_COMMENTS, to.params.slug)
-    ]).then(() => {
-      next();
-    });
-  },
-  computed: {
-    ...mapGetters(["article", "currentUser", "comments", "isAuthenticated"])
-  },
-  methods: {
-    parseMarkdown(content) {
-      return marked(content);
-    }
+const props = defineProps({
+  slug: {
+    type: String,
+    required: true
   }
+});
+
+const articleStore = useArticleStore();
+const authStore = useAuthStore();
+const route = useRoute();
+
+const article = computed(() => articleStore.article);
+const currentUser = computed(() => authStore.currentUser);
+const comments = computed(() => articleStore.comments);
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+
+onMounted(() => {
+  // Use props.slug or route.params.slug
+  const slug = props.slug || route.params.slug as string;
+  articleStore.fetchArticle(slug);
+  articleStore.fetchComments(slug);
+});
+
+const parseMarkdown = (content: string | null) => {
+  return marked.parse(content || "") as string;
 };
 </script>
+
+<style scoped></style>

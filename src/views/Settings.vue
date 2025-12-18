@@ -10,7 +10,7 @@
                 <input
                   class="form-control"
                   type="text"
-                  v-model="currentUser.image"
+                  v-model="form.image"
                   placeholder="URL of profile picture"
                 />
               </fieldset>
@@ -18,7 +18,7 @@
                 <input
                   class="form-control form-control-lg"
                   type="text"
-                  v-model="currentUser.username"
+                  v-model="form.username"
                   placeholder="Your username"
                 />
               </fieldset>
@@ -26,7 +26,7 @@
                 <textarea
                   class="form-control form-control-lg"
                   rows="8"
-                  v-model="currentUser.bio"
+                  v-model="form.bio"
                   placeholder="Short bio about you"
                 ></textarea>
               </fieldset>
@@ -34,7 +34,7 @@
                 <input
                   class="form-control form-control-lg"
                   type="text"
-                  v-model="currentUser.email"
+                  v-model="form.email"
                   placeholder="Email"
                 />
               </fieldset>
@@ -42,7 +42,7 @@
                 <input
                   class="form-control form-control-lg"
                   type="password"
-                  v-model="currentUser.password"
+                  v-model="form.password"
                   placeholder="Password"
                 />
               </fieldset>
@@ -62,27 +62,48 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import { LOGOUT, UPDATE_USER } from "@/store/actions.type";
+<script setup lang="ts">
+import { computed, reactive, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  name: "RwvSettings",
-  computed: {
-    ...mapGetters(["currentUser"])
-  },
-  methods: {
-    updateSettings() {
-      this.$store.dispatch(UPDATE_USER, this.currentUser).then(() => {
-        // #todo, nice toast and no redirect
-        this.$router.push({ name: "home" });
-      });
-    },
-    logout() {
-      this.$store.dispatch(LOGOUT).then(() => {
-        this.$router.push({ name: "home" });
-      });
-    }
+const authStore = useAuthStore();
+const router = useRouter();
+
+const currentUser = computed(() => authStore.currentUser);
+
+// Local state for the form to avoid strict mode violations if mutating props/store directly
+const form = reactive({
+  image: '',
+  username: '',
+  bio: '',
+  email: '',
+  password: ''
+});
+
+// Sync form with currentUser when it changes
+watch(currentUser, (newUser) => {
+  if (newUser) {
+    form.image = newUser.image || '';
+    form.username = newUser.username || '';
+    form.bio = newUser.bio || '';
+    form.email = newUser.email || '';
+    // password usually not returned or shouldn't be prefilled? Original code had it v-model to currentUser.password, but usually it's blank.
+    // If original code had it, currentUser object must have had a password field? Usually not.
   }
+}, { immediate: true, deep: true });
+
+const updateSettings = () => {
+  // Dispatch the form data
+  authStore.updateUser(form).then(() => {
+    router.push({ name: "home" });
+  });
+};
+
+const logout = () => {
+  authStore.logout();
+  router.push({ name: "home" });
 };
 </script>
+
+<style scoped></style>

@@ -10,11 +10,10 @@
   </ul>
 </template>
 
-<script>
-export default {
-  name: "TagList",
-  props: {
-    tags: Array
-  }
-};
+<script setup lang="ts">
+defineProps({
+  tags: Array
+});
 </script>
+
+<style scoped></style>

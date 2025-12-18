@@ -5,18 +5,13 @@
   </div>
 </template>
 
-<script>
-import RwvArticleList from "@/components/ArticleList";
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import RwvArticleList from "@/components/ArticleList.vue";
 
-export default {
-  name: "RwvProfileFavorited",
-  components: {
-    RwvArticleList
-  },
-  computed: {
-    favorited() {
-      return this.$route.params.username;
-    }
-  }
-};
+const route = useRoute();
+const favorited = computed(() => route.params.username as string);
 </script>
+
+<style scoped></style>

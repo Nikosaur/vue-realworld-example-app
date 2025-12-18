@@ -14,8 +14,6 @@
   </footer>
 </template>
 
-<script>
-export default {
-  name: "RwvFooter"
-};
-</script>
+<script setup lang="ts"></script>
+
+<style scoped></style>

@@ -10,7 +10,7 @@
             </router-link>
           </p>
           <ul v-if="errors" class="error-messages">
-            <li v-for="(v, k) in errors" :key="k">{{ k }} {{ v | error }}</li>
+            <li v-for="(v, k) in errors" :key="k">{{ k }} {{ errorFilter(v) }}</li>
           </ul>
           <form @submit.prevent="onSubmit">
             <fieldset class="form-group">
@@ -47,34 +47,31 @@
   </div>
 </template>
 
-<script>
-import { mapState } from "vuex";
-import { REGISTER } from "@/store/actions.type";
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+// @ts-ignore
+import { default as errorFilter } from "@/common/error.filter";
 
-export default {
-  name: "RwvRegister",
-  data() {
-    return {
-      username: "",
-      email: "",
-      password: ""
-    };
-  },
-  computed: {
-    ...mapState({
-      errors: state => state.auth.errors
+const authStore = useAuthStore();
+const router = useRouter();
+
+const username = ref("");
+const email = ref("");
+const password = ref("");
+
+const errors = computed(() => authStore.errors);
+
+const onSubmit = () => {
+  authStore
+    .register({
+      email: email.value,
+      password: password.value,
+      username: username.value
     })
-  },
-  methods: {
-    onSubmit() {
-      this.$store
-        .dispatch(REGISTER, {
-          email: this.email,
-          password: this.password,
-          username: this.username
-        })
-        .then(() => this.$router.push({ name: "home" }));
-    }
-  }
+    .then(() => router.push({ name: "home" }));
 };
 </script>
+
+<style scoped></style>

@@ -8,36 +8,33 @@
         :class="paginationClass(page)"
         @click.prevent="changePage(page)"
       >
-        <a class="page-link" href v-text="page" />
+        <a class="page-link" href="javascript:void(0)" v-text="page" />
       </li>
     </ul>
   </nav>
 </template>
 
-<script>
-export default {
-  name: "Pagination",
-  props: {
-    pages: {
-      type: Array,
-      required: true
-    },
-    currentPage: {
-      type: Number,
-      required: true
-    }
-  },
-  methods: {
-    changePage(goToPage) {
-      if (goToPage === this.currentPage) return;
-      this.$emit("update:currentPage", goToPage);
-    },
-    paginationClass(page) {
-      return {
-        "page-item": true,
-        active: this.currentPage === page
-      };
-    }
-  }
+<script setup lang="ts">
+const props = defineProps<{
+  pages: number[];
+  currentPage: number;
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:currentPage', page: number): void
+}>();
+
+const changePage = (goToPage: number) => {
+  if (goToPage === props.currentPage) return;
+  emit("update:currentPage", goToPage);
+};
+
+const paginationClass = (page: number) => {
+  return {
+    "page-item": true,
+    active: props.currentPage === page
+  };
 };
 </script>
+
+<style scoped></style>
